@@ -1,0 +1,10 @@
+services:
+  web:
+    image: sumat-org-web:latest
+    container_name: sumat-org-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${HOST_PORT:-10180}:80"
+    restart: unless-stopped

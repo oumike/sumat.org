@@ -31,6 +31,11 @@ const meshRelated = [
     name: 'MeshCore',
     url: 'https://meshcore.io',
     label: 'meshcore.io'
+  },
+  {
+    name: "Meshtastic",
+    url: 'https://meshtastic.org',
+    label: 'meshtastic.org',
   }
 ]
 

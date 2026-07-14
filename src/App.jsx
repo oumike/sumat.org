@@ -66,7 +66,8 @@ function App() {
   return (
     <main className="page">
       <section className="card" aria-labelledby="projects-heading">
-        <h1><p className="eyebrow">Sumat.Org</p></h1>
+        <h1>Sumat.Org</h1>
+        <br /><br />
         <h2 id="projects-heading" className="section-title">Projects</h2>
         <p className="intro">Some recent projects I've been working on.</p>
 
@@ -89,6 +90,8 @@ function App() {
           <h2 id="awesome-projects-heading" className="section-title">
             Awesome Projects
           </h2>
+        <p className="intro">Some excellent projects that I use.</p>
+
           <ul className="project-list mesh-list">
             {awesomeProjects.map((project) => (
               <li key={project.url} className="project-item">
@@ -109,6 +112,8 @@ function App() {
           <h2 id="mesh-related-heading" className="section-title">
             Mesh Related
           </h2>
+          <p className="intro">Mesh related links.</p>
+
           <ul className="project-list mesh-list">
             {meshRelated.map((project) => (
               <li key={project.url} className="project-item">

@@ -67,7 +67,7 @@ function App() {
     <main className="page">
       <section className="card" aria-labelledby="projects-heading">
         <h1><p className="eyebrow">Sumat.Org</p></h1>
-        <h2 id="projects-heading">Projects</h2>
+        <h2 id="projects-heading" className="section-title">Projects</h2>
         <p className="intro">Some recent projects I've been working on.</p>
 
         <ul className="project-list">

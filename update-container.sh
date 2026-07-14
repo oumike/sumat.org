@@ -4,7 +4,6 @@
 #
 #   ./update-container.sh
 #   ./update-container.sh --pull
-#   ./update-container.sh --no-prune
 #
 set -euo pipefail
 
@@ -20,18 +19,14 @@ else
 fi
 
 DO_PULL=0
-DO_PRUNE=1
 for arg in "$@"; do
   case "$arg" in
     --pull)
       DO_PULL=1
       ;;
-    --no-prune)
-      DO_PRUNE=0
-      ;;
     *)
       echo "error: unknown option '$arg'" >&2
-      echo "usage: ./update-container.sh [--pull] [--no-prune]" >&2
+      echo "usage: ./update-container.sh [--pull]" >&2
       exit 1
       ;;
   esac
@@ -47,15 +42,6 @@ $COMPOSE build
 
 echo "==> Recreating container"
 $COMPOSE up -d
-
-if [[ "$DO_PRUNE" -eq 1 ]]; then
-  echo "==> Pruning dangling images (best effort; 20s timeout)"
-  if ! timeout 20s docker image prune -f >/dev/null 2>&1; then
-    echo "warn: skipping prune (timed out or daemon busy)" >&2
-  fi
-else
-  echo "==> Skipping image prune (--no-prune)"
-fi
 
 echo "==> Status"
 $COMPOSE ps

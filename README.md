@@ -39,11 +39,9 @@ Use the included script to rebuild and refresh the container:
 Optional flags:
 
 - `--pull`: run `git pull --ff-only` before rebuild
-- `--no-prune`: skip dangling image prune
 
 Examples:
 
 ```bash
 ./update-container.sh --pull
-./update-container.sh --no-prune
 ```

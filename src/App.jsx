@@ -97,7 +97,7 @@ function App() {
     <main className="page">
       <section className="card" aria-labelledby="projects-heading">
         <header className="site-header">
-          <h1>Sumat.Org</h1>
+          <h1>Sumat</h1>
           <nav className="top-nav" aria-label="Jump to sections">
             <a className="top-nav-link" href="#about-me-heading">About Me</a>
             <a className="top-nav-link" href="#projects-heading">Projects</a>

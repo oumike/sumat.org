@@ -1,128 +1,49 @@
 import { useEffect, useState } from 'react'
 
-// TEMPORARY: themes for the trial theme picker. Each theme has `light` and
-// `dark` variable maps matching the CSS custom properties in index.css;
-// `dots` are just the source palette shown in the swatch.
-const themes = [
-  {
-    id: 'dune',
-    name: 'Dune',
-    dots: ['#767f9e', '#daa464', '#dec384', '#e8ddb4'],
-    light: {
-      '--bg-top': '#daa464',
-      '--bg-bottom': '#767f9e',
-      '--card-bg': '#e8ddb4',
-      '--surface': '#f6efda',
-      '--border': '#dec384',
-      '--text': '#3d4256',
-      '--muted': '#6b6a5e',
-      '--accent': '#767f9e',
-      '--accent-soft': '#eee4c2',
-      '--hover-border': '#daa464',
-      '--focus-ring': '#dec384',
-      '--shadow': '0 18px 45px rgba(118, 127, 158, 0.22)',
-    },
-    dark: {
-      '--bg-top': '#161922',
-      '--bg-bottom': '#0c0e13',
-      '--card-bg': '#1f232e',
-      '--surface': '#2b303d',
-      '--border': '#3f4557',
-      '--text': '#f2ecd6',
-      '--muted': '#cfc8ac',
-      '--accent': '#e6cd93',
-      '--accent-soft': '#2a2f3c',
-      '--hover-border': '#daa464',
-      '--focus-ring': '#dec384',
-      '--shadow': '0 18px 45px rgba(0, 0, 0, 0.5)',
-    },
+// Dune palette — light and dark variable maps matching the CSS custom
+// properties in index.css. Mode is chosen automatically by time of day and
+// can be overridden with the toggle in the card's top-right corner.
+const dune = {
+  light: {
+    '--bg-top': '#daa464',
+    '--bg-bottom': '#767f9e',
+    '--card-bg': '#e8ddb4',
+    '--surface': '#f6efda',
+    '--border': '#dec384',
+    '--text': '#3d4256',
+    '--muted': '#6b6a5e',
+    '--accent': '#767f9e',
+    '--accent-soft': '#eee4c2',
+    '--hover-border': '#daa464',
+    '--focus-ring': '#dec384',
+    '--shadow': '0 18px 45px rgba(118, 127, 158, 0.22)',
   },
-  {
-    id: 'harbor',
-    name: 'Harbor',
-    dots: ['#e8edf2', '#2c3947', '#547a95', '#c2a56d'],
-    light: {
-      '--bg-top': '#547a95',
-      '--bg-bottom': '#2c3947',
-      '--card-bg': '#e8edf2',
-      '--surface': '#f4f8fc',
-      '--border': '#d3dde6',
-      '--text': '#2c3947',
-      '--muted': '#547a95',
-      '--accent': '#547a95',
-      '--accent-soft': '#dbe6ef',
-      '--hover-border': '#c2a56d',
-      '--focus-ring': '#c2a56d',
-      '--shadow': '0 18px 45px rgba(44, 57, 71, 0.2)',
-    },
-    dark: {
-      '--bg-top': '#121820',
-      '--bg-bottom': '#090c10',
-      '--card-bg': '#1a222c',
-      '--surface': '#26303d',
-      '--border': '#374757',
-      '--text': '#eef2f7',
-      '--muted': '#b6c6d4',
-      '--accent': '#9dc0d8',
-      '--accent-soft': '#24303c',
-      '--hover-border': '#c2a56d',
-      '--focus-ring': '#c2a56d',
-      '--shadow': '0 18px 45px rgba(0, 0, 0, 0.5)',
-    },
+  dark: {
+    '--bg-top': '#161922',
+    '--bg-bottom': '#0c0e13',
+    '--card-bg': '#1f232e',
+    '--surface': '#2b303d',
+    '--border': '#3f4557',
+    '--text': '#f2ecd6',
+    '--muted': '#cfc8ac',
+    '--accent': '#e6cd93',
+    '--accent-soft': '#2a2f3c',
+    '--hover-border': '#daa464',
+    '--focus-ring': '#dec384',
+    '--shadow': '0 18px 45px rgba(0, 0, 0, 0.5)',
   },
-]
+}
 
-function applyTheme(theme, mode) {
-  for (const [key, value] of Object.entries(theme[mode])) {
+function applyMode(mode) {
+  for (const [key, value] of Object.entries(dune[mode])) {
     document.documentElement.style.setProperty(key, value)
   }
 }
 
-function ThemePicker() {
-  const [activeId, setActiveId] = useState(themes[0].id)
-  const [mode, setMode] = useState('light')
-
-  useEffect(() => {
-    const theme = themes.find((t) => t.id === activeId)
-    if (theme) applyTheme(theme, mode)
-  }, [activeId, mode])
-
-  return (
-    <section className="theme-picker" aria-label="Theme picker (temporary)">
-      <div className="theme-picker-head">
-        <p className="theme-picker-label">Try a theme</p>
-        <button
-          type="button"
-          className="theme-mode-toggle"
-          onClick={() => setMode((m) => (m === 'light' ? 'dark' : 'light'))}
-        >
-          {mode === 'light' ? '☀ Light' : '☾ Dark'}
-        </button>
-      </div>
-      <div className="theme-picker-options">
-        {themes.map((theme) => (
-          <button
-            key={theme.id}
-            type="button"
-            className="theme-swatch"
-            aria-pressed={theme.id === activeId}
-            onClick={() => setActiveId(theme.id)}
-          >
-            <span className="theme-swatch-dots" aria-hidden="true">
-              {theme.dots.map((color, i) => (
-                <span
-                  key={i}
-                  className="theme-swatch-dot"
-                  style={{ background: color }}
-                />
-              ))}
-            </span>
-            {theme.name}
-          </button>
-        ))}
-      </div>
-    </section>
-  )
+// Daytime (07:00–18:59) is light; evening and night are dark.
+function modeForNow() {
+  const hour = new Date().getHours()
+  return hour >= 7 && hour < 19 ? 'light' : 'dark'
 }
 
 const projects = [
@@ -221,9 +142,37 @@ const aboutMeSummary =
   'I am a senior full stack developer with more than two decades of experience across enterprise and startup work. I build and support end-to-end systems using TypeScript (Angular, NestJS), Node.js, PHP, Python, C#, and SQL, with strong CI/CD automation and cloud delivery practices. I enjoy learning new technologies, collaborating closely with clients and teams, and turning complex requirements into practical software. Outside of software, I am a photographer, writer, and artist.'
 
 function App() {
+  const [mode, setMode] = useState(modeForNow)
+  // Once the user picks a mode manually, stop auto-switching for the session.
+  const [manual, setManual] = useState(false)
+
+  useEffect(() => {
+    applyMode(mode)
+  }, [mode])
+
+  useEffect(() => {
+    if (manual) return
+    const id = setInterval(() => setMode(modeForNow()), 60 * 1000)
+    return () => clearInterval(id)
+  }, [manual])
+
+  const toggleMode = () => {
+    setManual(true)
+    setMode((m) => (m === 'light' ? 'dark' : 'light'))
+  }
+
   return (
     <main className="page">
       <section className="card" aria-labelledby="projects-heading">
+        <button
+          type="button"
+          className="mode-toggle"
+          onClick={toggleMode}
+          aria-label={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}
+          title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}
+        >
+          {mode === 'light' ? '☾' : '☀'}
+        </button>
         <header className="site-header">
           <h1>Sumat</h1>
           <nav className="top-nav" aria-label="Jump to sections">
@@ -345,7 +294,6 @@ function App() {
             </a>
           </div>
         </footer>
-        <ThemePicker />
       </section>
       </section>
     </main>

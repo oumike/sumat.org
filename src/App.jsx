@@ -137,6 +137,7 @@ const linkedInUrl = 'https://www.linkedin.com/in/michael-cojocari-83b1495/'
 const blueskyUrl = 'https://bsky.app/profile/oumike.bsky.social'
 const mastodonUrl = 'https://mastodon.social/@oumike'
 const gmailUrl = 'mailto:michael.cojocari@gmail.com'
+const coffeeUrl = 'https://buymeacoffee.com/oumike'
 
 const aboutMeSummary =
   'I am a senior full stack developer with more than two decades of experience across enterprise and startup work. I build and support end-to-end systems using TypeScript (Angular, NestJS), Node.js, PHP, Python, C#, and SQL, with strong CI/CD automation and cloud delivery practices. I enjoy learning new technologies, collaborating closely with clients and teams, and turning complex requirements into practical software. Outside of software, I am a photographer, writer, and artist.'
@@ -291,6 +292,14 @@ function App() {
               href={gmailUrl}
             >
               Gmail
+            </a>
+            <a
+              className="footer-link"
+              href={coffeeUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Buy me a coffee
             </a>
           </div>
         </footer>

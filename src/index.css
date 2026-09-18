@@ -256,6 +256,13 @@ h1 {
   font-size: 0.92rem;
 }
 
+/* Wrapper around the Buy Me a Coffee button; the button itself is styled by
+   the vendor markup it renders. */
+.footer-coffee {
+  margin-top: 0.4rem;
+  line-height: 0;
+}
+
 .footer-links {
   display: flex;
   align-items: center;

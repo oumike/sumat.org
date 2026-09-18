@@ -139,6 +139,83 @@ const mastodonUrl = 'https://mastodon.social/@oumike'
 const gmailUrl = 'mailto:michael.cojocari@gmail.com'
 const coffeeUrl = 'https://buymeacoffee.com/oumike'
 
+// Buy Me a Coffee's button script ends in document.writeln(), which would wipe
+// an already-parsed page, so it can't just be dropped in as a <script> tag
+// here. It only takes that path when it finds its own
+// script[data-name="bmc-button"] in the DOM; loaded without one it just leaves
+// window.bmcBtnWidget behind, which we call with the same data-* values and
+// render into the footer ourselves.
+const bmcScriptSrc = 'https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js'
+const bmcButton = {
+  text: 'Buy me a book.',
+  slug: 'oumike',
+  color: '#FFDD00',
+  emoji: '\u{1F4D6}',
+  font: 'Cookie',
+  fontColor: '#000000',
+  outlineColor: '#000000',
+  coffeeColor: '#ffffff',
+}
+
+function BuyMeACoffee() {
+  const [markup, setMarkup] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const render = () => {
+      if (cancelled || typeof window.bmcBtnWidget !== 'function') return
+      setMarkup(
+        window.bmcBtnWidget(
+          bmcButton.text,
+          bmcButton.slug,
+          bmcButton.color,
+          bmcButton.emoji,
+          bmcButton.font,
+          bmcButton.fontColor,
+          bmcButton.outlineColor,
+          bmcButton.coffeeColor,
+        ),
+      )
+    }
+
+    if (typeof window.bmcBtnWidget === 'function') {
+      render()
+      return () => {
+        cancelled = true
+      }
+    }
+
+    let script = document.querySelector(`script[src="${bmcScriptSrc}"]`)
+    if (!script) {
+      script = document.createElement('script')
+      script.src = bmcScriptSrc
+      script.async = true
+      document.body.appendChild(script)
+    }
+    script.addEventListener('load', render)
+
+    return () => {
+      cancelled = true
+      script.removeEventListener('load', render)
+    }
+  }, [])
+
+  // Until (or unless) the script loads, fall back to a plain text link.
+  return markup ? (
+    <div className="footer-coffee" dangerouslySetInnerHTML={{ __html: markup }} />
+  ) : (
+    <a
+      className="footer-link"
+      href={coffeeUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
+      {bmcButton.text}
+    </a>
+  )
+}
+
 const aboutMeSummary =
   'I am a senior full stack developer with more than two decades of experience across enterprise and startup work. I build and support end-to-end systems using TypeScript (Angular, NestJS), Node.js, PHP, Python, C#, and SQL, with strong CI/CD automation and cloud delivery practices. I enjoy learning new technologies, collaborating closely with clients and teams, and turning complex requirements into practical software. Outside of software, I am a photographer, writer, and artist.'
 
@@ -293,15 +370,8 @@ function App() {
             >
               Gmail
             </a>
-            <a
-              className="footer-link"
-              href={coffeeUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Buy me a coffee
-            </a>
           </div>
+          <BuyMeACoffee />
         </footer>
       </section>
       </section>

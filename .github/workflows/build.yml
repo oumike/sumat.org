@@ -1,0 +1,161 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+    # Skip the run for pushes that cannot change what ships. The Dockerfile,
+    # nginx.conf and docker-compose.yml are deliberately NOT in this list: all
+    # three are part of the published image, so editing one changes the artifact
+    # even though no JavaScript moved.
+    #
+    # update-container.sh is not ignored either — shellcheck below checks it,
+    # and that script is the one that runs on the production host.
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.claude/**'
+  pull_request:
+    branches: [ main ]
+    # No paths-ignore on pull_request, on purpose. If this workflow is ever made
+    # a required status check, a docs-only PR filtered out here never reports a
+    # result at all and the merge button stays disabled forever.
+  workflow_dispatch:
+
+# Only the newest push on a ref is worth checking.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+# This job publishes nothing and needs nothing.
+permissions:
+  contents: read
+
+# IMPORTANT: this workflow must NOT push an image to GHCR — not even under a
+# branch- or SHA-derived tag.
+#
+# The server's update-container.sh runs `docker compose pull`, which resolves
+# ghcr.io/oumike/sumat.org:latest. Any tag this job published would be one
+# `docker compose pull` away from production, from a commit nobody decided to
+# release. release.yml is the only writer of that package, and it moves :latest
+# last — after the git tag and the GitHub Release already exist. Keep push:false.
+#
+# What this job is for: proving a clean checkout still lints and builds, and
+# that the image still assembles. A local `npm run dev` never touches the
+# Dockerfile or nginx.conf, and `npm run build` cannot fail on either of them.
+#
+# There are no tests and no typecheck in this repo. oxlint, `npm run build` and
+# the image smoke test below are the whole of what can be checked today.
+
+jobs:
+  build:
+    name: Build site and image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # Not a preference — a copy of `node:22-alpine` in the Dockerfile,
+          # which is the only Node that ever builds the shipped artifact. CI on
+          # a different major would be a green check that says nothing about the
+          # image. Keep the two numbers in step.
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build site
+        run: npm run build
+
+      - name: Shellcheck the deploy script
+        # Preinstalled on ubuntu-latest. update-container.sh runs on the
+        # production host with `set -euo pipefail`, so an unquoted expansion
+        # there fails a deploy rather than a test.
+        run: shellcheck update-container.sh
+
+      - name: Validate compose files
+        # Parses and interpolates both, which catches a broken ${VAR:-default}
+        # that would otherwise only surface on the server.
+        run: |
+          docker compose -f docker-compose.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: sumat-org-web:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Assemble every published architecture
+        # The image the server runs is arm64; the one smoke-tested above is the
+        # runner's amd64. Without this step an arm64-only breakage — a base tag
+        # that stops publishing arm64, a RUN added to the serve stage — would
+        # surface at release time, or worse, as a `docker compose pull` that
+        # fails on the host with "no matching manifest".
+        #
+        # push:false and load:false: nothing is published and nothing is loaded
+        # (a multi-platform manifest cannot be), so this only answers "does it
+        # assemble". Nearly free — the Node stage is pinned to $BUILDPLATFORM
+        # and already cached by the step above.
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: false
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+
+      - name: nginx config parses
+        # `npm run build` cannot fail on nginx.conf, and nothing else here reads
+        # it.
+        run: docker run --rm --entrypoint nginx sumat-org-web:ci -t
+
+      - name: Serve and probe
+        run: |
+          set -euo pipefail
+          docker run -d --name ci-smoke -p 8080:80 sumat-org-web:ci
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+
+          body=$(curl -fsS http://127.0.0.1:8080/)
+
+          # The page must reference its built assets, and the first one must
+          # actually be served.
+          asset=$(printf '%s' "$body" | grep -oE '/assets/[^"]+\.js' | head -1 || true)
+          if [ -z "$asset" ]; then
+            echo "::error::index.html does not reference /assets/*.js"
+            exit 1
+          fi
+          curl -fsS -o /dev/null "http://127.0.0.1:8080${asset}"
+
+          # SPA fallback. The probe path must not collide with anything real in
+          # the served root, or try_files matches it instead of falling back.
+          probe='/__spa_fallback_probe__'
+          code=$(curl -fsS -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080${probe}")
+          if [ "$code" != "200" ]; then
+            echo "::error::SPA fallback returned $code for ${probe}"
+            exit 1
+          fi
+
+          docker rm -f ci-smoke

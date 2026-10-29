@@ -1,0 +1,16 @@
+# Local build overlay. Use with the base file, never on its own:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# The `image:` override is the whole point — a local build is tagged
+# sumat-org-web:local and so can never be mistaken for, or overwrite, the
+# published ghcr.io image the server runs.
+#
+# Most local work is `npm run dev`. This path exists to exercise nginx.conf,
+# which the Vite dev server never touches.
+services:
+  web:
+    build:
+      context: .
+    image: sumat-org-web:local
+    pull_policy: build

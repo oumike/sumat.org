@@ -62,11 +62,18 @@ const projects = [
       'Meshtastic-compatible firmware for ESP32-S3 handhelds with multi-channel chat, browser setup, YAML import/export, GPS, and direct messages.',
   },
   {
-    name: 'Plumeria',
-    url: 'https://plumeria.sumat.org',
-    label: 'plumeria.sumat.org',
+    name: 'Platy APRS',
+    url: 'https://platy.sumat.org',
+    label: 'platy.sumat.org',
     summary:
-      'MeshCore-compatible standalone firmware featuring an LVGL on-device UI, up to 40 channels, contacts, direct messages, GPS, and Wi-Fi config.',
+      'APRS client firmware for ESP32-S3 handhelds that talks KISS over Bluetooth LE to a TNC or radio, or LoRa APRS on the board\'s own radio, with a browser-based flasher.',
+  },
+  {
+    name: 'Monster Cyberspace',
+    url: 'https://oumike.github.io/monster-cyberspace/',
+    label: 'oumike.github.io/monster-cyberspace',
+    summary:
+      'Standalone ESP32 firmware client for the cyberspace.online text-only social network, with cIRC chat, C-Mail private messages, and an on-device web config page.',
   },
 ]
 

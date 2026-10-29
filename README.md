@@ -4,7 +4,8 @@ Simple React website that links to:
 
 - https://www.indiebooksofdetroit.com
 - https://camillia.sumat.org
-- https://plumeria.sumat.org
+- https://platy.sumat.org
+- https://oumike.github.io/monster-cyberspace/
 
 ## Local development
 

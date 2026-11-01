@@ -69,11 +69,11 @@ const projects = [
       'APRS client firmware for ESP32-S3 handhelds that talks KISS over Bluetooth LE to a TNC or radio, or LoRa APRS on the board\'s own radio, with a browser-based flasher.',
   },
   {
-    name: 'Monster Cyberspace',
-    url: 'https://oumike.github.io/monster-cyberspace/',
-    label: 'oumike.github.io/monster-cyberspace',
+    name: 'Monster for Cyberspace',
+    url: 'https://monster.sumat.org',
+    label: 'monster.sumat.org',
     summary:
-      'Standalone ESP32 firmware client for the cyberspace.online text-only social network, with cIRC chat, C-Mail private messages, and an on-device web config page.',
+      'Standalone ESP32 firmware client for the cyberspace.online text-only social network: cIRC chat, C-Mail, the Feed, guilds and profiles, with a browser flasher.',
   },
 ]
 

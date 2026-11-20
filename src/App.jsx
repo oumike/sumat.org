@@ -140,6 +140,7 @@ const awesomeProjects = [
     }
 ]
 
+const githubUrl = 'https://github.com/oumike'
 const linkedInUrl = 'https://www.linkedin.com/in/michael-cojocari-83b1495/'
 const blueskyUrl = 'https://bsky.app/profile/oumike.bsky.social'
 const mastodonUrl = 'https://mastodon.social/@oumike'
@@ -347,6 +348,14 @@ function App() {
         <footer className="site-footer" aria-label="Footer">
           <p className="footer-label">Find me on</p>
           <div className="footer-links">
+            <a
+              className="footer-link"
+              href={githubUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub
+            </a>
             <a
               className="footer-link"
               href={linkedInUrl}
